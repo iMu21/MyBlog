@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
+    'rest_auth',
     'theBlog',
     'ckeditor',
     'ckeditor_uploader',
@@ -153,3 +155,9 @@ STATICFILES_DIRS = (
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+DEFAULT_PARSER_CLASSES= [
+   'rest_framework.parsers.JSONParser',
+   'rest_framework.parsers.FormParser',
+   'rest_framework.parsers.MultiPartParser',
+]
