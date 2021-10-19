@@ -1,7 +1,7 @@
 import theBlog.models
 from theBlog.serializers import PostSerializer,CategorySerializer,PostSerializerDetail,UserSerializer,UserSerializerDetail
 from rest_framework import generics
-from theBlog.permissions import IsOwnerOrReadOnly,IsSuperUser,IsUserOrReadOnly
+from theBlog.permissions import IsOwnerOrReadOnly,IsSuperUser,IsUserOrReadOnly,ReadOnly
 from django.contrib.auth.models import User
 
 class post_list(generics.ListCreateAPIView):
@@ -28,7 +28,7 @@ class category_detail(generics.RetrieveUpdateDestroyAPIView):
 class user_list(generics.ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsSuperUser]
+    permission_classes = [ReadOnly]
 
 class user_detail(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()

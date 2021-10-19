@@ -15,22 +15,21 @@ class CategorySerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
-        fields = ['username','first_name','last_name','email','date_joined']
+        fields = ["username","first_name","last_name","email","date_joined","last_login"]
         
 class UserSerializerDetail(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
-        fields = ['username','first_name','last_name','email']
+        fields = ["username","first_name","last_name","email","date_joined","last_login","password"]
+        extra_kwargs = {'password': {'write_only': True},'username': {'read_only': True},'date_joined': {'read_only': True},'last_login': {'read_only': True}}
 
-    def create(self, validated_data):
-        user =  self.context['request'].user
-        validated_data['user'] = user
-        return models.User.objects.create(**validated_data)
 
 class PostSerializer(serializers.ModelSerializer):
+    author = UserSerializer(read_only=True)
     class Meta:
         model = models.Post
         fields = ['author','title','title_tag','category_name','header_image','body','created']
+        
     
     def create(self, validated_data):
         user =  self.context['request'].user
@@ -58,6 +57,7 @@ class PostSerializerDetail(serializers.ModelSerializer):
     class Meta:
         model = models.Post
         fields = ['author','title','title_tag','category_name','header_image','body','created']
+        extra_kwargs = {'author': {'read_only': True}}
     
     def update(self,instance, validated_data):
         file = open(r'theBlog/BadWords.csv')
