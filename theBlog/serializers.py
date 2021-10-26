@@ -20,8 +20,8 @@ class UserSerializer(serializers.ModelSerializer):
 class UserSerializerDetail(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
-        fields = ["username","first_name","last_name","email","date_joined","last_login","password"]
-        extra_kwargs = {'password': {'write_only': True},'username': {'read_only': True},'date_joined': {'read_only': True},'last_login': {'read_only': True}}
+        fields = ["first_name","last_name","email","date_joined","last_login","password"]
+        extra_kwargs = {'password': {'write_only': True},'date_joined': {'read_only': True},'last_login': {'read_only': True}}
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -84,5 +84,8 @@ class PostSerializerDetail(serializers.ModelSerializer):
         return instance
     
     
-   
-    
+class RegistrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = ["username","email","password"]
+        extra_kwargs = {"password": {"write_only": True}}

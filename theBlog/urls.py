@@ -12,4 +12,6 @@ urlpatterns = [
     path('users/', views.user_list.as_view(),name='userList'),
     path('users/<int:pk>/', views.user_detail.as_view(),name='userDetail'),
 
+    path('signup/', views.sign_up,name='signUp'),
+    path('login/', views.login,name='logIn'),
 ]
