@@ -12,6 +12,13 @@ class IsUserOrReadOnly(permissions.BasePermission):
             return True
         return obj.email == request.user.email
 
+class IsUserOrReadOnlyProfile(permissions.BasePermission):
+    def has_object_permission(self, request,view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return obj.username == request.user
+
+
 class IsSuperUser(permissions.IsAdminUser):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:

@@ -1,18 +1,20 @@
 from django.contrib.auth.base_user import BaseUserManager
+from django.contrib.auth.hashers import make_password
 from django.utils.translation import ugettext_lazy
 
 class CustomUserManager(BaseUserManager):
 
-    def create_user(self,email,username,password,**extra_fields):
+    def create_user(self,email,username,date_of_birth,password):
         if not email:
             raise ValueError(ugettext_lazy('The Email must be set'))
         email = self.normalize_email(email)
         if not username:
             raise ValueError(ugettext_lazy('The Username must be set'))
-        username = self.normalize_email(username)
-        user = self.model(email=email,username=username,**extra_fields)
-        user.set_password(password)
-        user.save()
+        if not date_of_birth:
+            raise ValueError(ugettext_lazy('The date of birth must be set'))
+        password = make_password(password)
+        user = self.model(email=email,username=username,date_of_birth=date_of_birth,password=password)
+        user.save(using=self._db)
         return user
 
     def create_superuser(self,email,username,password,**extra_fields):

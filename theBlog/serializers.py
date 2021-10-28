@@ -15,20 +15,27 @@ class CategorySerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
-        fields = ["username","first_name","last_name","email","date_joined","last_login"]
-        
-class UserSerializerDetail(serializers.ModelSerializer):
+        fields = ["username","first_name","last_name","email","date_of_birth","date_joined","last_login"]
+
+class UserBasicSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
-        fields = ["first_name","last_name","email","date_joined","last_login","password"]
+        fields = ["first_name","last_name","email","date_of_birth","date_joined","last_login","password"]
         extra_kwargs = {'password': {'write_only': True},'date_joined': {'read_only': True},'last_login': {'read_only': True}}
 
+class UserProfileSerializer(serializers.ModelSerializer):
+    username = UserBasicSerializer()
+    class Meta:
+        model = models.UserDetail
+        fields = ["username","nickName", "profilePhoto","religion","gender","highSchool","college","university","worksAt","parmanentAddress","currentAddress","about","total_followers"]
+        extra_kwargs = {'username': {'read_only': True},'total_followers':{'read_only':True}}
 
 class PostSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
     class Meta:
         model = models.Post
-        fields = ['author','title','title_tag','category_name','header_image','body','created']
+        fields = ['author','title','title_tag','category_name','header_image','body','created','total_likes']
+        extra_kwargs = {'total_likes':{'read_only':True}}
         
     
     def create(self, validated_data):
@@ -56,8 +63,8 @@ class PostSerializerDetail(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
     class Meta:
         model = models.Post
-        fields = ['author','title','title_tag','category_name','header_image','body','created']
-        extra_kwargs = {'author': {'read_only': True}}
+        fields = ['author','title','title_tag','category_name','header_image','body','created','total_likes']
+        extra_kwargs = {'author': {'read_only': True},'total_likes': {'read_only': True}}
     
     def update(self,instance, validated_data):
         file = open(r'theBlog/BadWords.csv')
@@ -87,5 +94,10 @@ class PostSerializerDetail(serializers.ModelSerializer):
 class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
-        fields = ["username","email","password"]
+        fields = ["username","email","password","date_of_birth"]
         extra_kwargs = {"password": {"write_only": True}}
+
+    def create(self, validated_data):
+        instance = models.get_user_model().objects.create(**validated_data)
+        models.UserDetail.objects.create(username=instance)
+        return instance

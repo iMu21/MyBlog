@@ -2,6 +2,7 @@ from django.contrib.auth.base_user import AbstractBaseUser
 from django.db import models
 from ckeditor_uploader.fields import RichTextUploadingField 
 from django.contrib.auth.models import AbstractUser
+from django.db.models.fields.related import OneToOneField
 from django.utils.translation import ugettext_lazy
 from .managers import CustomUserManager
 from django.contrib.auth import get_user_model
@@ -20,8 +21,55 @@ class CustomUser(AbstractUser):
     objects = CustomUserManager()
     
     def __str__(self):
-        return str(self.username)+" | "+str(self.email)
+        return str(self.username)
 
+class UserDetail(models.Model):
+    username = models.OneToOneField(get_user_model(),on_delete = models.CASCADE, primary_key=True)
+    nickName = models.CharField(max_length=20,null=True,blank=True)
+    profilePhoto = models.ImageField(null=True,blank=True,upload_to="Profile Photo/")
+    RELIGION_CHOICES = (
+    ('Christianity','Christianity'),
+    ('Islam','Islam'),
+    ('Atheist','Atheist'),
+    ('Hinduism','Hinduism'),
+    ('Buddhism','Buddhism'),
+    ('Ethnic','Ethnic'),
+    ('Sikhism','Sikhism'),
+    ('Spiritism','Spiritism'),
+    ('Judaism','Judaism'),
+    ('Jainism','Jainism'),
+    ('Shinto','Shinto'),
+    ('Cao Dai','Cao Dai'),
+    ('Zoroastrianism','Zoroastrianism'),
+    ('Tenrikyo','Tenrikyo'),
+    ('Animism','Animism'),
+    ('Neo-Paganism','Neo-Paganism'),
+    ('Unitarian','Unitarian'),
+    ('Rastafari','Rastafari'),
+    ('Other','Other'),
+)
+    GENDER_CHOICES = (
+    ('Male','Male'),
+    ('Female','Female'),
+    ('Other','Other'),
+)
+    religion = models.CharField(max_length=20, choices=RELIGION_CHOICES,null=True,blank=True)
+    gender = models.CharField(max_length=20, choices=GENDER_CHOICES,null=True,blank=True)
+    highSchool = models.CharField(max_length=100,null=True,blank=True)
+    college = models.CharField(max_length=100,null=True,blank=True)
+    university = models.CharField(max_length=100,null=True,blank=True)
+    worksAt = models.CharField(max_length=100,null=True,blank=True)
+    parmanentAddress = models.CharField(max_length=200,null=True,blank=True)
+    currentAddress = models.CharField(max_length=200,null=True,blank=True)
+    about = models.CharField(max_length=500,null=True,blank=True)
+    followers = models.ManyToManyField(get_user_model(),related_name='followers')
+
+
+    def total_followers(self):
+        return self.followers.count()
+
+    def __str__(self):
+        return str(self.username)
 
 class Post(models.Model):
     title = models.CharField(max_length=255)
@@ -31,10 +79,13 @@ class Post(models.Model):
     category_name = models.ForeignKey("Category", on_delete=models.CASCADE)
     body = RichTextUploadingField(blank=True,null=True,config_name="default")
     created = models.DateTimeField(auto_now_add=True)
+    likes = models.ManyToManyField(get_user_model(),related_name='postLikes',blank=True)
 
     class Meta:
-        ordering = ['title']
+        ordering = ['-created']
 
+    def total_likes(self):
+        return self.likes.count()
 
     def __str__(self):
         return self.title + ' | ' + str(self.author)
