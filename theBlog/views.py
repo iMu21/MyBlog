@@ -136,7 +136,8 @@ def logOut(request):
     data={"message":"Logged out successfully."}
     return Response(data)
 
-
+@api_view(["POST","GET"])          
+@parser_classes([JSONParser])
 def post_like(request,pk):
     try:
         try:
@@ -146,13 +147,17 @@ def post_like(request,pk):
             return Response(data)
         if post.likes.filter(id=request.user.id).exists():
             post.likes.remove(request.user)
+            data={"massage":"Post has been unliked."}
+            return Response(data)
         else:
             post.likes.add(request.user)
-        return redirect('postDetail',pk)
+            data={"massage":"Post has been liked."}
+            return Response(data)
     except:
         data={"error":"Log in first."}
         return Response(data)
-
+@api_view(["POST","GET"])          
+@parser_classes([JSONParser])
 def user_follow(request,pk):
     try:
         try:
@@ -162,9 +167,12 @@ def user_follow(request,pk):
             return Response(data)
         if idol.followers.filter(id=request.user.id).exists():
             idol.followers.remove(request.user)
+            data={"massage":"User has been unfollowed."}
+            return Response(data)
         else:
             idol.followers.add(request.user)
-        return redirect('userProfile',pk)
+            data={"massage":"User has been followed."}
+            return Response(data)
     except:
         data={"error":"Log in first."}
         return Response(data)
