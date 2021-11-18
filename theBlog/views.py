@@ -1,7 +1,7 @@
 from rest_framework.permissions import AllowAny
 import theBlog.models
-from theBlog.serializers import RegistrationSerializer,PostSerializer,CategorySerializer,PostSerializerDetail,UserSerializer,UserProfileSerializer,UserBasicSerializer
-from rest_framework import generics
+from theBlog.serializers import FollowerSerializer,RegistrationSerializer,PostSerializer,CategorySerializer,PostSerializerDetail,UserSerializer,UserProfileSerializer,UserBasicSerializer
+from rest_framework import generics, serializers
 from theBlog.permissions import IsOwnerOrReadOnly,IsSuperUser,IsUserOrReadOnly,ReadOnly,IsUserOrReadOnlyProfile
 from django.contrib.auth import authenticate, get_user_model,login,logout
 from rest_framework import authentication
@@ -14,6 +14,7 @@ from rest_framework.parsers import JSONParser
 import json
 from django.contrib.auth.hashers import check_password, make_password
 from django.shortcuts import redirect
+from rest_framework.renderers import JSONRenderer
 
 class post_list(generics.ListCreateAPIView):
     authentication_classes = (authentication.TokenAuthentication,authentication.SessionAuthentication)
@@ -65,18 +66,19 @@ class user_profile(generics.RetrieveUpdateDestroyAPIView):
 def sign_up(request):
     try:
         data = {}
+        if request.data['confirm password'] !=request.data['password']:
+            data={"error":"'password' & 'confirm password' must be same"}
+            return Response(data)
         request.data['password']=make_password(request.data['password'])
         serializer = RegistrationSerializer(data=request.data)
         if serializer.is_valid():
             account = serializer.save()
             account.is_active = True
             account.save()
-            token = Token.objects.get_or_create(user=account)[int(0)].key
             data["message"] = "Signed Up Successfully"
             data["email"] = account.email
             data["username"] = account.username
             data["date_of_birth"] = account.date_of_birth
-            data["token"] = token
 
         else:
             data = serializer.errors
@@ -86,10 +88,12 @@ def sign_up(request):
     except IntegrityError as e:
         account=get_user_model().objects.get(email='')
         account.delete()
-        raise ValidationError({"400": f'{str(e)}'})
+        data={"error": f'{str(e)}'}
+        return Response(data)
 
     except KeyError as e:
-        raise ValidationError({"400": f'Field {str(e)} missing'})
+        data={ f'{str(e)}': "This field is required."}
+        return Response(data)
 
 
 @api_view(["POST"])
@@ -102,50 +106,95 @@ def signin(request):
         password = body['password']
         try:
             Account = get_user_model().objects.get(email=email)
-        except BaseException as e:
-            raise ValidationError({"400": f'{str(e)}'})
+        except:
+            data={"error":"User is not find."}
+            return Response(data)
 
-        token = Token.objects.get_or_create(user=Account)[0].key
         if not check_password(password, Account.password):
-            raise ValidationError({"message": f'{"Incorrect Login credentials"}'})
+            data={"error":"Incorrect Login credentials."}
+            return Response(data)
         if Account:
             if Account.is_active:
                 login(request,Account)
                 data["message"] = "User Logged In"
                 data["email"] = Account.email
-                data["token"] = token
 
                 return Response(data)
 
             else:
-                raise ValidationError({"400": f'Account not active'})
+                data={"error":"Account doesnt exist."}
+                return Response(data)
 
         else:
-            raise ValidationError({"400": f'Account doesnt exist'})
+            data={"error":"Account doesnt exist."}
+            return Response(data)
 
+@api_view(["POST","GET"])          
+@parser_classes([JSONParser])
 def logOut(request):   
-    logout(request) 
-    return redirect('postList')
+    logout(request)
+    data={"message":"Logged out successfully."}
+    return Response(data)
 
 
 def post_like(request,pk):
     try:
-        post = theBlog.models.Post.objects.get(id=pk)
+        try:
+            post = theBlog.models.Post.objects.get(id=pk)
+        except:
+            data={"error":"Post doesn't exist."}
+            return Response(data)
         if post.likes.filter(id=request.user.id).exists():
             post.likes.remove(request.user)
         else:
             post.likes.add(request.user)
         return redirect('postDetail',pk)
     except:
-        raise ValidationError({"400": f'Log in First'})
+        data={"error":"Log in first."}
+        return Response(data)
 
 def user_follow(request,pk):
     try:
-        idol = theBlog.models.UserDetail.objects.get(id=pk)
+        try:
+            idol = theBlog.models.UserDetail.objects.get(pk=pk)
+        except:
+            data={"error":"User doesn't exist."}
+            return Response(data)
         if idol.followers.filter(id=request.user.id).exists():
             idol.followers.remove(request.user)
         else:
             idol.followers.add(request.user)
         return redirect('userProfile',pk)
     except:
-        raise ValidationError({"400": f'Log in First'})
+        data={"error":"Log in first."}
+        return Response(data)
+
+
+@api_view(["GET"])          
+@parser_classes([JSONParser])
+def user_followers(request):
+    try:
+        idol = theBlog.models.UserDetail.objects.get(username=request.user)
+        follower = idol.followers.all()
+        serializer = FollowerSerializer(follower,many=True)
+        return Response(serializer.data)
+    except:
+        data={"error":"Log in first."}
+        return Response(data)
+
+
+@api_view(["GET"])          
+@parser_classes([JSONParser])
+def post_likers(request,pk):
+    try:
+        try:
+            post = theBlog.models.Post.objects.get(pk=pk)
+        except:
+            data={"error":"Post doesn't exist."}
+            return Response(data)
+        liker = post.likes.all()
+        serializer = FollowerSerializer(liker,many=True)
+        return Response(serializer.data)
+    except:
+        data={"error":"Log in first."}
+        return Response(data)

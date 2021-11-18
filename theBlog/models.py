@@ -7,7 +7,7 @@ from django.utils.translation import ugettext_lazy
 from .managers import CustomUserManager
 from django.contrib.auth import get_user_model
 from phonenumber_field.modelfields import PhoneNumberField
-
+from enum import Enum
 
 class CustomUser(AbstractUser):
     username = models.CharField(max_length=100, unique=True)
@@ -22,39 +22,30 @@ class CustomUser(AbstractUser):
     
     def __str__(self):
         return str(self.username)
+    
+        
 
 class UserDetail(models.Model):
     username = models.OneToOneField(get_user_model(),on_delete = models.CASCADE, primary_key=True)
     nickName = models.CharField(max_length=20,null=True,blank=True)
     profilePhoto = models.ImageField(null=True,blank=True,upload_to="Profile Photo/")
-    RELIGION_CHOICES = (
-    ('Christianity','Christianity'),
-    ('Islam','Islam'),
-    ('Atheist','Atheist'),
-    ('Hinduism','Hinduism'),
-    ('Buddhism','Buddhism'),
-    ('Ethnic','Ethnic'),
-    ('Sikhism','Sikhism'),
-    ('Spiritism','Spiritism'),
-    ('Judaism','Judaism'),
-    ('Jainism','Jainism'),
-    ('Shinto','Shinto'),
-    ('Cao Dai','Cao Dai'),
-    ('Zoroastrianism','Zoroastrianism'),
-    ('Tenrikyo','Tenrikyo'),
-    ('Animism','Animism'),
-    ('Neo-Paganism','Neo-Paganism'),
-    ('Unitarian','Unitarian'),
-    ('Rastafari','Rastafari'),
-    ('Other','Other'),
-)
-    GENDER_CHOICES = (
-    ('Male','Male'),
-    ('Female','Female'),
-    ('Other','Other'),
-)
-    religion = models.CharField(max_length=20, choices=RELIGION_CHOICES,null=True,blank=True)
-    gender = models.CharField(max_length=20, choices=GENDER_CHOICES,null=True,blank=True)
+    
+    class ReligionChoices(Enum):
+        Christianity='Christianity'
+        Islam='Islam'
+        Atheist='Atheist'
+        Hinduism='Hinduism'
+        Buddhism='Buddhism'
+        Ethnic='Ethnic'
+        Other='Other'
+
+    class GenderChoices(Enum):
+        Male='Male'
+        Female='Female'
+        Other='Other'
+
+    religion = models.CharField(max_length=20, choices=[(i,i.value) for i in ReligionChoices],null=True,blank=True)
+    gender = models.CharField(max_length=20, choices=[(i,i.value) for i in GenderChoices],null=True,blank=True)
     highSchool = models.CharField(max_length=100,null=True,blank=True)
     college = models.CharField(max_length=100,null=True,blank=True)
     university = models.CharField(max_length=100,null=True,blank=True)
@@ -62,7 +53,7 @@ class UserDetail(models.Model):
     parmanentAddress = models.CharField(max_length=200,null=True,blank=True)
     currentAddress = models.CharField(max_length=200,null=True,blank=True)
     about = models.CharField(max_length=500,null=True,blank=True)
-    followers = models.ManyToManyField(get_user_model(),related_name='followers')
+    followers = models.ManyToManyField(get_user_model(),related_name='followers',blank=True)
 
 
     def total_followers(self):

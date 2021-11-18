@@ -92,12 +92,18 @@ class PostSerializerDetail(serializers.ModelSerializer):
     
     
 class RegistrationSerializer(serializers.ModelSerializer):
+    token = serializers.CharField(max_length=255, read_only=True)
     class Meta:
         model = get_user_model()
-        fields = ["username","email","password","date_of_birth"]
+        fields = ["username","email","password","date_of_birth","token"]
         extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
         instance = models.get_user_model().objects.create(**validated_data)
         models.UserDetail.objects.create(username=instance)
         return instance
+
+class FollowerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = ["username","first_name","last_name"]
