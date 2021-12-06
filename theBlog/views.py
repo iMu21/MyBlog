@@ -206,3 +206,20 @@ def post_likers(request,pk):
     except:
         data={"error":"Log in first."}
         return Response(data)
+
+@api_view(["POST"])          
+@parser_classes([JSONParser])
+def tag_posts(request):
+    try:
+        body = json.loads(request.body)
+        tag = body['tag']
+        posts = theBlog.models.Post.objects.filter(title_tag__name__contains=tag)
+        if len(posts)==0:
+            data={"message":"Post doesn't exist."}
+            return Response(data)
+        serializer = PostSerializer(posts,many=True)
+        return Response(serializer.data)
+    except:
+        data={"error":"Log in first."}
+        return Response(data)
+

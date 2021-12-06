@@ -7,6 +7,7 @@ urlpatterns = [
     path('posts/<int:pk>/', views.post_detail.as_view(),name='postDetail'),
     path('postlike/<int:pk>/', views.post_like,name='postLike'),
     path('postlikers/<int:pk>/', views.post_likers,name='postLikers'),
+    path('tag_posts/', views.tag_posts,name='tag_posts'),
 
     path('categories/', views.category_list.as_view(),name='categoryList'),
     path('categories/<int:pk>/', views.category_detail.as_view(),name='categoryDetail'),
