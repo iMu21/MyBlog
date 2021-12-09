@@ -3,18 +3,14 @@ import theBlog.models
 from theBlog.serializers import FollowerSerializer,RegistrationSerializer,PostSerializer,CategorySerializer,PostSerializerDetail,UserSerializer,UserProfileSerializer,UserBasicSerializer
 from rest_framework import generics, serializers
 from theBlog.permissions import IsOwnerOrReadOnly,IsSuperUser,IsUserOrReadOnly,ReadOnly,IsUserOrReadOnlyProfile
-from django.contrib.auth import authenticate, get_user_model,login,logout
+from django.contrib.auth import  get_user_model,login,logout
 from rest_framework import authentication
 from rest_framework.decorators import api_view,permission_classes,parser_classes
 from rest_framework.response import Response
 from django.db import IntegrityError
-from django.core.exceptions import ValidationError
-from rest_framework.authtoken.models import Token
 from rest_framework.parsers import JSONParser
 import json
 from django.contrib.auth.hashers import check_password, make_password
-from django.shortcuts import redirect
-from rest_framework.renderers import JSONRenderer
 
 class post_list(generics.ListCreateAPIView):
     authentication_classes = (authentication.TokenAuthentication,authentication.SessionAuthentication)
@@ -206,3 +202,60 @@ def post_likers(request,pk):
     except:
         data={"error":"Log in first."}
         return Response(data)
+
+@api_view(["POST"])          
+@parser_classes([JSONParser])
+def updateTags(request,pk):
+    try:
+        body = json.loads(request.body)
+        tags = body['tags']
+        try:
+            post = theBlog.models.Post.objects.get(pk=pk)
+        except:
+            data={"message":"Post doesn't exist."}
+            return Response(data)
+
+        existingTags = post.tags[:-1]
+        for tag in tags:
+            if tag in post.tags:
+                pass
+            else:
+                existingTags=existingTags+',"'+tag+'"'
+        existingTags=existingTags+"]"
+        post.tags=existingTags
+        post.save()
+        data={"message":"New tags has been added"}
+        return Response(data)
+    except:
+        data={"error":"Log in first."}
+        return Response(data)
+
+@api_view(["POST"])          
+@parser_classes([JSONParser])
+def deleteTags(request,pk):
+    try:
+        body = json.loads(request.body)
+        tags = body['tags']
+        try:
+            post = theBlog.models.Post.objects.get(pk=pk)
+        except:
+            data={"message":"Post doesn't exist."}
+            return Response(data)
+
+        existingTags = list(post.tags[1:-1].split(','))
+        for tag in tags:
+            tag='"'+tag+'"'
+            if tag in existingTags:
+                existingTags.remove(tag)
+            else:
+                pass
+        existingTags="["+','.join(existingTags)+"]"
+        post.tags=existingTags
+        post.save()
+        data={"message":"Tags has been deleted"}
+        return Response(data)
+    except:
+        data={"error":"Log in first."}
+        return Response(data)
+
+

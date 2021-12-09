@@ -57,6 +57,7 @@ INSTALLED_APPS = [
 
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
+    'embed_video',
 ]
 
 MIDDLEWARE = [
@@ -95,11 +96,14 @@ WSGI_APPLICATION = 'MyBlog.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'db_myblog',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+        'USER': 'imu',
+        'PASSWORD': 'imu@42099',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
