@@ -1,13 +1,7 @@
-from django.contrib.auth.models import User
-from django.http import request
 from rest_framework import serializers
-from rest_framework.fields import CharField
-from rest_framework.response import Response
-from rest_framework import status
 from theBlog import models
-from django.contrib.auth import get_user_model
-import csv
 from django.contrib import messages
+from .users import UserSerializer
 
 class Base64ImageField(serializers.ImageField):
     def to_internal_value(self, data):
@@ -53,23 +47,6 @@ class CategorySerializer(serializers.ModelSerializer):
         model = models.Category
         fields = ['category_name']
     
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = get_user_model()
-        fields = ["username","first_name","last_name","email","date_of_birth","date_joined","last_login"]
-
-class UserBasicSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = get_user_model()
-        fields = ["first_name","last_name","email","date_of_birth","date_joined","last_login","password"]
-        extra_kwargs = {'password': {'write_only': True},'date_joined': {'read_only': True},'last_login': {'read_only': True}}
-
-class UserProfileSerializer(serializers.ModelSerializer):
-    username = UserBasicSerializer()
-    class Meta:
-        model = models.UserDetail
-        fields = ["username","nickName", "profilePhoto","religion","gender","highSchool","college","university","worksAt","parmanentAddress","currentAddress","about","total_followers","followers_id"]
-        extra_kwargs = {'username': {'read_only': True},'total_followers':{'read_only':True}}
 
 class PostSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
@@ -115,21 +92,3 @@ class PostSerializerDetail(serializers.ModelSerializer):
         if 'body' in validated_data:
             instance.body=validated_data['body']
         return instance
-    
-    
-class RegistrationSerializer(serializers.ModelSerializer):
-    token = serializers.CharField(max_length=255, read_only=True)
-    class Meta:
-        model = get_user_model()
-        fields = ["username","email","password","date_of_birth","token"]
-        extra_kwargs = {"password": {"write_only": True}}
-
-    def create(self, validated_data):
-        instance = models.get_user_model().objects.create(**validated_data)
-        models.UserDetail.objects.create(username=instance)
-        return instance
-
-class FollowerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = get_user_model()
-        fields = ["username","first_name","last_name"]

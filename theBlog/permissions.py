@@ -4,7 +4,10 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request,view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
-        return obj.author == request.user
+        try:
+            return obj.author == request.user
+        except:
+            return obj.email == request.user.email
 
 class IsUserOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request,view, obj):

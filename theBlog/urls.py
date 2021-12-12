@@ -1,25 +1,25 @@
 from django.urls import path
-from theBlog import views
+from theBlog.views import blogs,users
 
 urlpatterns = [
     
-    path('posts/', views.post_list.as_view(),name='postList'),
-    path('posts/<int:pk>/', views.post_detail.as_view(),name='postDetail'),
-    path('postlike/<int:pk>/', views.post_like,name='postLike'),
-    path('postlikers/<int:pk>/', views.post_likers,name='postLikers'),
-    path('updateTags/<int:pk>/', views.updateTags,name='tag_posts'),
-    path('deleteTags/<int:pk>/', views.deleteTags,name='tag_posts'),
+    path('posts/', blogs.post_list.as_view(),name='postList'),
+    path('posts/<int:pk>/', blogs.post_detail.as_view(),name='postDetail'),
+    path('postlike/<int:pk>/', blogs.post_like,name='postLike'),
+    path('postlikers/<int:pk>/', blogs.post_likers,name='postLikers'),
+    path('updateTags/<int:pk>/', blogs.updateTags,name='tag_posts'),
+    path('deleteTags/<int:pk>/', blogs.deleteTags,name='tag_posts'),
 
-    path('categories/', views.category_list.as_view(),name='categoryList'),
-    path('categories/<int:pk>/', views.category_detail.as_view(),name='categoryDetail'),
+    path('categories/', blogs.category_list.as_view(),name='categoryList'),
+    path('categories/<int:pk>/', blogs.category_detail.as_view(),name='categoryDetail'),
 
-    path('users/', views.user_list.as_view(),name='userList'),
-    path('userBasic/<int:pk>/', views.user_basic.as_view(),name='userBasic'),
-    path('userProfile/<int:pk>/', views.user_profile.as_view(),name='userProfile'),
-    path('userfollow/<int:pk>/', views.user_follow,name='userFollow'),
-    path('userfollowers/', views.user_followers,name='userFollowers'),
+    path('users/', users.user_list.as_view(),name='userList'),
+    path('userBasic/<int:pk>/', users.user_basic.as_view(),name='userBasic'),
+    path('userProfile/<int:pk>/', users.user_profile.as_view(),name='userProfile'),
+    path('userfollow/<int:pk>/', users.user_follow,name='userFollow'),
+    path('userfollowers/<int:pk>', users.user_followers,name='userFollowers'),
 
-    path('signup/', views.sign_up,name='signUp'),
-    path('signin/', views.signin,name='signIn'),
-    path('logout/', views.logOut,name='logOut'),
+    path('signup/', users.sign_up,name='signUp'),
+    path('signin/', users.signin,name='signIn'),
+    path('logout/', users.logOut,name='logOut'),
 ]
