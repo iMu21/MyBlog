@@ -18,6 +18,9 @@ urlpatterns = [
     path('userProfile/<int:pk>/', users.user_profile.as_view(),name='userProfile'),
     path('userfollow/<int:pk>/', users.user_follow,name='userFollow'),
     path('userfollowers/<int:pk>', users.user_followers,name='userFollowers'),
+    path('userblock/<int:pk>/', users.user_block,name='userBlock'),
+    path('userblocks/', users.user_blocks,name='userBlocks'),
+
 
     path('signup/', users.sign_up,name='signUp'),
     path('signin/', users.signin,name='signIn'),

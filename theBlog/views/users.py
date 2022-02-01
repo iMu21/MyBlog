@@ -135,3 +135,40 @@ def user_followers(request,pk):
     follower = idol.followers.all()
     serializer = FollowerSerializer(follower,many=True)
     return Response(serializer.data)
+
+
+#to block an user with primary key pk
+@api_view(["POST"])  
+@permission_classes([IsAuthenticated])        
+@parser_classes([JSONParser])
+def user_block(request,pk):
+    try:
+        try:
+            personToBlock = get_user_model().objects.get(pk=pk)
+        except:
+            data={"error":"User doesn't exist."}
+        user = theBlog.models.UserDetail.objects.get(pk=request.user.id)
+        if user.blocks.filter(id=personToBlock.pk).exists():
+            user.blocks.remove(personToBlock)
+            data={"massage":"User has been unblocked."}
+        else:
+            user.blocks.add(personToBlock)
+            data={"massage":"User has been blocked."}
+    except:
+        data={"error":"Log in first."}
+    return Response(data)
+
+
+#to view someone's blocks with primary key pk
+@api_view(["GET"])          
+@parser_classes([JSONParser])
+@permission_classes([IsAuthenticated])
+def user_blocks(request):
+    try:
+        user = theBlog.models.UserDetail.objects.get(pk=request.user.id)
+    except:
+        data = {"message" : "User doesn't exist."}
+        return Response(data)
+    block = user.blocks.all()
+    serializer = FollowerSerializer(block,many=True)
+    return Response(serializer.data)

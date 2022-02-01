@@ -57,6 +57,8 @@ class UserDetail(models.Model):
     currentAddress = models.CharField(max_length=200,null=True,blank=True)
     about = models.CharField(max_length=500,null=True,blank=True)
     followers = models.ManyToManyField(get_user_model(),related_name='followers',blank=True)
+    blocks = models.ManyToManyField(get_user_model(),related_name='blocks',blank=True)
+
 
 
     def total_followers(self):
@@ -65,6 +67,12 @@ class UserDetail(models.Model):
     def followers_id(self):
         l=[]
         for i in self.followers.all():
+            l.append(i.pk)
+        return l
+
+    def blocks_id(self):
+        l=[]
+        for i in self.blocks.all():
             l.append(i.pk)
         return l
 
